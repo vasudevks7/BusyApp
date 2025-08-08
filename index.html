@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#008080">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung Phone - Fake Call</title>
+    <script src="https://kit.fontawesome.com/2b78fc514b.js" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Samsung One', 'Roboto', sans-serif;
+            background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=);
+            background-image: linear-gradient( #E2E5E5, #3f3a3a);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phone-container {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #8844c7 0%, #1d47c4 100%);
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Samsung Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 16px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            background: transparent;
+            height: 28px;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .signal-bars {
+            display: flex;
+            gap: 1px;
+            align-items: end;
+        }
+
+        .signal-bar {
+            width: 3px;
+            background: white;
+            border-radius: 1px;
+        }
+
+        .signal-bar:nth-child(1) { height: 3px; }
+        .signal-bar:nth-child(2) { height: 5px; }
+        .signal-bar:nth-child(3) { height: 7px; }
+        .signal-bar:nth-child(4) { height: 9px; }
+
+        .battery {
+            width: 24px;
+            height: 12px;
+            border: 1px solid white;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .battery::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 3px;
+            width: 2px;
+            height: 6px;
+            background: white;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            height: 100%;
+            width: 80%;
+            background: white;
+            border-radius: 1px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .control-panel h1 {
+            color: white;
+            margin-bottom: 40px;
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .control-btn {
+            padding: 16px 32px;
+            margin: 12px;
+            border: none;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+
+        .start-btn {
+            background: #1976D2;
+            color: white;
+        }
+
+        .stop-btn {
+            background: #D32F2F;
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Samsung Incoming Call Screen */
+        .incoming-call {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000 0%, #1a1a1a 50%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 100;
+        }
+
+        .incoming-call.show {
+            transform: translateY(0);
+        }
+
+        .call-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 60px 20px 40px;
+        }
+
+        .incoming-label {
+            font-size: 16px;
+            color: #B3B3B3;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        .caller-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 70px;
+            margin: 20px auto;
+            background: #2196F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            animation: pulseRing 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .caller-avatar::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: pulseRing 2s infinite;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .caller-name {
+            font-size: 30px;
+            font-weight: 400;
+            margin: 24px 0 8px;
+            text-align: center;
+        }
+
+        .caller-number {
+            font-size: 16px;
+            color: #B3B3B3;
+            margin-bottom: 8px;
+        }
+
+        .call-type {
+            font-size: 14px;
+            color: #B3B3B3;
+        }
+
+        /* Enhanced Samsung Call Actions */
+        .call-actions {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 40px 60px 160px;
+            position: relative;
+        }
+
+        .swipe-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0px 8px 25px rgba(0,0,0,0.3);
+            user-select: none;
+            touch-action: none;
+            position: relative;
+            transform-origin: center;
+        }
+
+        .swipe-btn::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 60%, rgba(255,255,255,0.1) 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .swipe-btn.dragging::before {
+            opacity: 1;
+        }
+
+        .swipe-btn.active {
+            transform: scale(1.2);
+            box-shadow: 0px 12px 35px rgba(0,0,0,0.5);
+        }
+
+        .green-btn {
+            background: linear-gradient(135deg, #4CAF50, #2E8B57);
+        }
+
+        .green-btn.active {
+            background: linear-gradient(135deg, #00C853, #009624);
+        }
+
+        .green-btn.dragging {
+            background: linear-gradient(135deg, #00E676, #00C853);
+            transform: scale(1.1);
+        }
+
+        .red-btn {
+            background: linear-gradient(135deg, #E53935, #B71C1C);
+        }
+
+        .red-btn.active {
+            background: linear-gradient(135deg, #FF1744, #D50000);
+        }
+
+        .red-btn.dragging {
+            background: linear-gradient(135deg, #FF5252, #FF1744);
+            transform: scale(1.1);
+        }
+
+        .message-btn {
+            background: rgba(255, 255, 255, 0);
+            color: rgba(255, 255, 255, 0);
+            font-size: 0px;
+            width: 70px;
+            height: 0px;
+        }
+
+        /* Active Call Screen - Samsung Style */
+        .active-call {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .active-call.show {
+            transform: translateY(0);
+        }
+
+        .active-call-header {
+            text-align: center;
+            color: white;
+            padding: 60px 20px 40px;
+            flex-shrink: 0;
+        }
+
+        .active-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            margin: 20px auto;
+            background: #2196F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            color: white;
+        }
+
+        .active-name {
+            font-size: 24px;
+            font-weight: 400;
+            margin: 16px 0 8px;
+        }
+
+        .call-duration {
+            font-size: 16px;
+            color: #B3B3B3;
+        }
+
+        /* Samsung Call Controls Grid */
+        .call-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px 20px;
+            padding: 60px 40px;
+            flex: 1;
+            align-items: start;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .control-icon:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-icon.active {
+            background: #2196F3;
+        }
+
+        .control-label {
+            color: white;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .end-call-container {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            flex-shrink: 0;
+        }
+
+        .end-call-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 32px;
+            background: #FF5252;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .end-call-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Samsung Keypad Modal */
+        .keypad-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 200;
+        }
+
+        .keypad-modal.show {
+            transform: translateY(0);
+        }
+
+        .keypad-header {
+            padding: 60px 20px 20px;
+            text-align: center;
+        }
+
+        .keypad-display {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 40px;
+            min-height: 32px;
+            font-weight: 300;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px 40px;
+            margin-bottom: 40px;
+        }
+
+        .keypad-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.2s ease;
+            font-weight: 400;
+        }
+
+        .keypad-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.95);
+        }
+
+        .keypad-letters {
+            font-size: 10px;
+            margin-top: 4px;
+            color: #B3B3B3;
+            font-weight: 400;
+        }
+
+        .keypad-close {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .close-keypad-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        /* Samsung Animations */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .muted {
+            background: #FF5252 !important;
+        }
+
+        .speaker-on {
+            background: #2196F3 !important;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #time {
+            font-size: 60px;
+            font-weight: bold;
+            color: #2c3e50;
+            padding-left: 30px;
+            padding-top: 50px;
+        }
+
+        /* Drag feedback styles */
+        .drag-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .drag-feedback.show {
+            opacity: 1;
+        }
+
+        /* Samsung specific icons using unicode */
+        .icon-phone::before { content: '📞'; }
+        .icon-message::before { content: '💬'; }
+        .icon-mute::before { content: '🔇'; }
+        .icon-unmute::before { content: '🎤'; }
+        .icon-speaker::before { content: '🔊'; }
+        .icon-speaker-off::before { content: '🔇'; }
+        .icon-keypad::before { content: '⌨️'; }
+        .icon-add::before { content: '➕'; }
+        .icon-video::before { content: '📹'; }
+        .icon-contacts::before { content: '👥'; }
+        .icon-close::before { content: '✕'; }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        
+        <!-- Control Panel -->
+        <div class="control-panel" id="controlPanel">
+            <h1>Fake Call</h1>
+            <button class="control-btn start-btn" id="startBtn">Start</button>
+            <button class="control-btn stop-btn" id="stopBtn" disabled>Stop</button>
+        </div>
+
+        <!-- Samsung Incoming Call Screen -->
+        <div class="incoming-call" id="incomingCall">
+            <div class="call-info">
+                <div class="incoming-label">Incoming call</div>
+                <div class="caller-avatar" id="callerAvatar">👤</div>
+                <div class="caller-name" id="callerName">John Doe</div>
+                <div class="caller-number" id="callerNumber">+82 10-1234-5678</div>
+                <div class="call-type">Mobile</div>
+            </div>
+            <div class="call-actions">
+                <button id="endBtn" class="swipe-btn red-btn"><i class="fa-solid fa-phone fa-rotate-by" style="color: #ffffff; --fa-rotate-angle: 135deg;"></i></button>
+                <button id="messageBtn" class="message-btn"></button>
+                <button id="answerBtn" class="swipe-btn green-btn"><i class="fa-solid fa-phone" style="color: #ffffff;"></i></button>
+            </div>
+            <div class="drag-feedback" id="dragFeedback">Swipe or tap to answer</div>
+        </div>
+
+        <!-- Samsung Active Call Screen -->
+        <div class="active-call" id="activeCall">
+            <div class="active-call-header">
+                <div class="active-avatar" id="activeAvatar">👤</div>
+                <div class="active-name" id="activeName">John Doe</div>
+                <div class="call-duration" id="callDuration">00:00</div>
+            </div>
+
+            <div class="call-controls">
+                <div class="control-item">
+                    <button class="control-icon" id="muteBtn">🎤</button>
+                    <span class="control-label">Mute</span>
+                </div>
+                <div class="control-item">
+                    <button class="control-icon" id="keypadBtn">⌨️</button>
+                    <span class="control-label">Keypad</span>
+                </div>
+                <div class="control-item">
+                    <button class="control-icon" id="speakerBtn">🔊</button>
+                    <span class="control-label">Speaker</span>
+                </div>
+                <div class="control-item">
+                    <button class="control-icon" id="addCallBtn">➕</button>
+                    <span class="control-label">Add call</span>
+                </div>
+                <div class="control-item">
+                    <button class="control-icon" id="videoBtn">📹</button>
+                    <span class="control-label">Video call</span>
+                </div>
+                <div class="control-item">
+                    <button class="control-icon" id="contactsBtn">👥</button>
+                    <span class="control-label">Contacts</span>
+                </div>
+            </div>
+
+            <div class="end-call-container">
+                <button class="end-call-btn" id="endCallBtn">📞</button>
+            </div>
+        </div>
+
+        <!-- Samsung Keypad Modal -->
+        <div class="keypad-modal" id="keypadModal">
+            <div class="keypad-header">
+                <div class="keypad-display" id="keypadDisplay"></div>
+            </div>
+            <div class="keypad">
+                <button class="keypad-btn" data-key="1">1<div class="keypad-letters"></div></button>
+                <button class="keypad-btn" data-key="2">2<div class="keypad-letters">ABC</div></button>
+                <button class="keypad-btn" data-key="3">3<div class="keypad-letters">DEF</div></button>
+                <button class="keypad-btn" data-key="4">4<div class="keypad-letters">GHI</div></button>
+                <button class="keypad-btn" data-key="5">5<div class="keypad-letters">JKL</div></button>
+                <button class="keypad-btn" data-key="6">6<div class="keypad-letters">MNO</div></button>
+                <button class="keypad-btn" data-key="7">7<div class="keypad-letters">PQRS</div></button>
+                <button class="keypad-btn" data-key="8">8<div class="keypad-letters">TUV</div></button>
+                <button class="keypad-btn" data-key="9">9<div class="keypad-letters">WXYZ</div></button>
+                <button class="keypad-btn" data-key="*">*</button>
+                <button class="keypad-btn" data-key="0">0<div class="keypad-letters">+</div></button>
+                <button class="keypad-btn" data-key="#">#</button>
+            </div>
+            <div class="keypad-close">
+                <button class="close-keypad-btn" id="closeKeypad">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="ringtone" src="ringtone.mp3" preload="auto"></audio>
+
+    
+
+    <script>
+        class SamsungFakeCallApp {
+            constructor() {
+                this.initializeElements();
+                this.initializeState();
+                this.bindEvents();
+                this.updateTime();
+            }
+
+            initializeElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.controlPanel = document.getElementById('controlPanel');
+                this.incomingCall = document.getElementById('incomingCall');
+                this.activeCall = document.getElementById('activeCall');
+                this.keypadModal = document.getElementById('keypadModal');
+                
+                this.callerName = document.getElementById('callerName');
+                this.callerNumber = document.getElementById('callerNumber');
+                this.callerAvatar = document.getElementById('callerAvatar');
+                this.activeName = document.getElementById('activeName');
+                this.activeAvatar = document.getElementById('activeAvatar');
+                this.callDuration = document.getElementById('callDuration');
+                
+                this.answerBtn = document.getElementById('answerBtn');
+                this.endBtn = document.getElementById('endBtn');
+                this.messageBtn = document.getElementById('messageBtn');
+                this.endCallBtn = document.getElementById('endCallBtn');
+                this.dragFeedback = document.getElementById('dragFeedback');
+                
+                this.muteBtn = document.getElementById('muteBtn');
+                this.keypadBtn = document.getElementById('keypadBtn');
+                this.speakerBtn = document.getElementById('speakerBtn');
+                this.addCallBtn = document.getElementById('addCallBtn');
+                this.videoBtn = document.getElementById('videoBtn');
+                this.contactsBtn = document.getElementById('contactsBtn');
+                
+                this.keypadDisplay = document.getElementById('keypadDisplay');
+                this.closeKeypad = document.getElementById('closeKeypad');
+                
+                this.ringtone = document.getElementById('ringtone');
+                this.currentTime = document.getElementById('current-time');
+            }
+
+            initializeState() {
+                this.samsungContacts = [
+                    { name: 'Mom', number: '+82 10-1234-5678', avatar: '👤' },
+                    { name: 'Dad', number: '+82 10-2345-6789', avatar: '👤' },
+                    { name: 'HR - Samsung', number: '+82 2-2255-0114', avatar: '👤' },
+                    { name: 'Elon Musk', number: '+82 10-4567-8901', avatar: '👤' },
+                    { name: 'Narendra Modi', number: '+82 10-5678-9012', avatar: '👤' },
+                    { name: 'HR - Infosys', number: '114', avatar: '👤' },
+                    { name: 'CEO - Amazon', number: '+82 10-0000-0000', avatar: '👤' },
+                    { name: 'Donald Trump', number: 'I put Tariff on You', avatar: '👤' },
+                    { name: 'Cristiano Ronaldo', number: '+82 10-3333-7777', avatar: '👤' },
+                    { name: 'Mr Beast', number: '+82 10-8888-7777', avatar: '👤' },
+                    { name: 'Neymar Jr', number: '+82 10-9999-6666', avatar: '👤' },
+                    { name: 'Taylor Swift', number: '+82 10-5555-7777', avatar: '👤' },
+                    { name: 'Virat Kohli', number: '+82 10-4444-5555', avatar: '👤' },
+                    { name: 'Bill Gates', number: '+82 10-2222-1111', avatar: '👤' },
+                    { name: 'Rhebhick', number: 'Technalogia', avatar: '👤' }
+                ];
+
+                this.callInterval = null;
+                this.timerInterval = null;
+                this.callStartTime = null;
+                this.isMuted = false;
+                this.isSpeakerOn = false;
+                this.keypadValue = '';
+            }
+
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.startFakeCalls());
+                this.stopBtn.addEventListener('click', () => this.stopFakeCalls());
+                
+                this.messageBtn.addEventListener('click', () => this.showQuickMessage());
+                this.endCallBtn.addEventListener('click', () => this.endCall());
+                
+                this.muteBtn.addEventListener('click', () => this.toggleMute());
+                this.keypadBtn.addEventListener('click', () => this.showKeypad());
+                this.speakerBtn.addEventListener('click', () => this.toggleSpeaker());
+                this.addCallBtn.addEventListener('click', () => this.showToast(''));
+                this.videoBtn.addEventListener('click', () => this.showToast(''));
+                this.contactsBtn.addEventListener('click', () => this.showToast(''));
+                
+                this.closeKeypad.addEventListener('click', () => this.hideKeypad());
+                
+                // Keypad buttons
+                document.querySelectorAll('.keypad-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.keypadPress(btn.dataset.key));
+                });
+
+                // Handle back button / escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideKeypad();
+                    }
+                });
+
+                // Initialize enhanced swipe buttons
+                this.initializeSwipeButtons();
+            }
+
+            initializeSwipeButtons() {
+                // Enhanced swipe button functionality
+                this.makeEnhancedSwipeButton(this.answerBtn, () => this.acceptCall(), 'answer');
+                this.makeEnhancedSwipeButton(this.endBtn, () => this.declineCall(), 'decline');
+            }
+
+            makeEnhancedSwipeButton(btn, onActivate, type) {
+                let startX = 0;
+                let startY = 0;
+                let isDragging = false;
+                let hasMoved = false;
+                const threshold = 25; // Minimum distance to trigger swipe
+
+                // Mouse events
+                btn.addEventListener('mousedown', (e) => {
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    isDragging = true;
+                    hasMoved = false;
+                    btn.classList.add('dragging');
+                    this.showDragFeedback(true);
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    if (distance > 5) {
+                        hasMoved = true;
+                    }
+                    
+                    // Visual feedback during drag
+                    if (distance > threshold) {
+                        btn.classList.add('active');
+                        this.updateDragFeedback(type, distance);
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                document.addEventListener('mouseup', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    isDragging = false;
+                    btn.classList.remove('dragging', 'active');
+                    this.showDragFeedback(false);
+                    
+                    // Trigger action if dragged far enough or just tapped
+                    if (distance > threshold || !hasMoved) {
+                        this.activateButton(btn, onActivate, type);
+                    }
+                });
+
+                // Touch events
+                btn.addEventListener('touchstart', (e) => {
+                    const touch = e.touches[0];
+                    startX = touch.clientX;
+                    startY = touch.clientY;
+                    isDragging = true;
+                    hasMoved = false;
+                    btn.classList.add('dragging');
+                    this.showDragFeedback(true);
+                    e.preventDefault();
+                });
+
+                document.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const touch = e.touches[0];
+                    const deltaX = touch.clientX - startX;
+                    const deltaY = touch.clientY - startY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    if (distance > 5) {
+                        hasMoved = true;
+                    }
+                    
+                    // Visual feedback during drag
+                    if (distance > threshold) {
+                        btn.classList.add('active');
+                        this.updateDragFeedback(type, distance);
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                    
+                    e.preventDefault();
+                });
+
+                document.addEventListener('touchend', (e) => {
+                    if (!isDragging) return;
+                    
+                    const touch = e.changedTouches[0];
+                    const deltaX = touch.clientX - startX;
+                    const deltaY = touch.clientY - startY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    isDragging = false;
+                    btn.classList.remove('dragging', 'active');
+                    this.showDragFeedback(false);
+                    
+                    // Trigger action if dragged far enough or just tapped
+                    if (distance > threshold || !hasMoved) {
+                        this.activateButton(btn, onActivate, type);
+                    }
+                });
+
+                // Regular click as fallback
+                btn.addEventListener('click', (e) => {
+                    if (!isDragging && !hasMoved) {
+                        this.activateButton(btn, onActivate, type);
+                    }
+                });
+            }
+
+            activateButton(btn, callback, type) {
+                // Add visual feedback
+                btn.classList.add('active');
+                
+                // Haptic feedback if available
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(type === 'answer' ? [50, 30, 50] : [100]);
+                }
+                
+                // Execute callback after short delay for better UX
+                setTimeout(() => {
+                    btn.classList.remove('active');
+                    callback();
+                }, 200);
+            }
+
+            showDragFeedback(show) {
+                if (show) {
+                    this.dragFeedback.classList.add('show');
+                } else {
+                    this.dragFeedback.classList.remove('show');
+                }
+            }
+
+            updateDragFeedback(type, distance) {
+                const intensity = Math.min(distance / 100, 1);
+                if (type === 'answer') {
+                    this.dragFeedback.textContent = intensity > 0.7 ? 'Release to answer!' : 'Keep dragging to answer';
+                } else {
+                    this.dragFeedback.textContent = intensity > 0.7 ? 'Release to decline!' : 'Keep dragging to decline';
+                }
+            }
+
+            updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('ko-KR', { 
+                    hour12: false, 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                if (this.currentTime) {
+                    this.currentTime.textContent = timeString;
+                }
+                setTimeout(() => this.updateTime(), 1000);
+            }
+
+            startFakeCalls() {
+                this.startBtn.disabled = true;
+                this.stopBtn.disabled = false;
+                
+                // First call after 3 seconds
+                setTimeout(() => this.showIncomingCall(), 3000);
+                
+                // Random calls every 20-40 seconds
+                this.callInterval = setInterval(() => {
+                    if (!this.incomingCall.classList.contains('show') && !this.activeCall.classList.contains('show')) {
+                        this.showIncomingCall();
+                    }
+                }, Math.random() * 20000 + 20000);
+            }
+
+            stopFakeCalls() {
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                
+                if (this.callInterval) {
+                    clearInterval(this.callInterval);
+                    this.callInterval = null;
+                }
+                
+                this.hideAllScreens();
+                this.ringtone.pause();
+                this.ringtone.currentTime = 0;
+            }
+
+            showIncomingCall() {
+                const contact = this.getRandomContact();
+                
+                this.callerName.textContent = contact.name;
+                this.callerNumber.textContent = contact.number;
+                this.callerAvatar.textContent = contact.avatar;
+                
+                this.controlPanel.style.display = 'none';
+                this.incomingCall.classList.add('show');
+                
+                // Start Samsung ringtone
+                this.ringtone.currentTime = 0;
+                this.ringtone.play().catch(() => {
+                    console.log('Audio playback failed - user interaction required');
+                });
+
+                // Auto decline after 30 seconds
+                setTimeout(() => {
+                    if (this.incomingCall.classList.contains('show')) {
+                        this.declineCall();
+                    }
+                }, 30000);
+            }
+
+            acceptCall() {
+                this.ringtone.pause();
+                this.ringtone.currentTime = 0;
+                
+                const callerName = this.callerName.textContent;
+                const callerAvatar = this.callerAvatar.textContent;
+                
+                this.activeName.textContent = callerName;
+                this.activeAvatar.textContent = callerAvatar;
+                
+                this.incomingCall.classList.remove('show');
+                this.activeCall.classList.add('show');
+                
+                this.startCallTimer();
+                this.showToast('Call connected');
+            }
+
+            declineCall() {
+                this.ringtone.pause();
+                this.ringtone.currentTime = 0;
+                this.incomingCall.classList.remove('show');
+                this.controlPanel.style.display = 'block';
+                this.showToast('Call declined');
+            }
+
+            showQuickMessage() {
+                const messages = [
+                    "I can't talk right now",
+                    "I'll get back to you later",
+                    "I'm in a meeting",
+                    "I'm driving."
+                ];
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                this.showToast(`Send message: "${randomMessage}"`);
+                setTimeout(() => this.declineCall(), 1000);
+            }
+
+            endCall() {
+                this.stopCallTimer();
+                this.activeCall.classList.remove('show');
+                this.controlPanel.style.display = 'block';
+                this.resetCallControls();
+                this.showToast('Call ended');
+            }
+
+            startCallTimer() {
+                this.callStartTime = Date.now();
+                this.timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.callStartTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    this.callDuration.textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            stopCallTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                this.callDuration.textContent = '00:00';
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                this.muteBtn.textContent = this.isMuted ? '🔇' : '🎤';
+                this.muteBtn.classList.toggle('muted', this.isMuted);
+                this.showToast(this.isMuted ? 'Muted' : 'Unmuted');
+            }
+
+            toggleSpeaker() {
+                this.isSpeakerOn = !this.isSpeakerOn;
+                this.speakerBtn.classList.toggle('speaker-on', this.isSpeakerOn);
+                this.showToast(this.isSpeakerOn ? 'Speaker on' : 'Speaker off');
+            }
+
+            showKeypad() {
+                this.keypadModal.classList.add('show');
+                this.keypadValue = '';
+                this.keypadDisplay.textContent = '';
+            }
+
+            hideKeypad() {
+                this.keypadModal.classList.remove('show');
+            }
+
+            keypadPress(key) {
+                this.keypadValue += key;
+                this.keypadDisplay.textContent = this.keypadValue;
+                
+                // Play DTMF tone effect
+                this.playDTMFTone(key);
+                
+                // Add visual feedback
+                const btn = document.querySelector(`[data-key="${key}"]`);
+                if (btn) {
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                    }, 100);
+                }
+            }
+
+            playDTMFTone(key) {
+                // DTMF frequencies for each key
+                const dtmfFreqs = {
+                    '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+                    '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+                    '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+                    '*': [941, 1209], '0': [941, 1336], '#': [941, 1477]
+                };
+
+                if (!dtmfFreqs[key]) return;
+
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const [freq1, freq2] = dtmfFreqs[key];
+                    
+                    const oscillator1 = audioContext.createOscillator();
+                    const oscillator2 = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator1.frequency.value = freq1;
+                    oscillator2.frequency.value = freq2;
+                    oscillator1.type = 'sine';
+                    oscillator2.type = 'sine';
+                    
+                    oscillator1.connect(gainNode);
+                    oscillator2.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+                    
+                    oscillator1.start();
+                    oscillator2.start();
+                    oscillator1.stop(audioContext.currentTime + 0.2);
+                    oscillator2.stop(audioContext.currentTime + 0.2);
+                } catch (error) {
+                    console.log('DTMF tone generation failed:', error);
+                }
+            }
+
+            showToast(message) {
+                // Remove existing toast
+                const existingToast = document.querySelector('.samsung-toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                // Create Samsung-style toast notification
+                const toast = document.createElement('div');
+                toast.className = 'samsung-toast';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 100px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.85);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 24px;
+                    font-size: 14px;
+                    font-weight: 400;
+                    z-index: 1000;
+                    backdrop-filter: blur(10px);
+                    animation: fadeInUp 0.3s ease, fadeOutDown 0.3s ease 2.7s;
+                `;
+                
+                // Add CSS for animations
+                if (!document.querySelector('#toast-styles')) {
+                    const styles = document.createElement('style');
+                    styles.id = 'toast-styles';
+                    styles.textContent = `
+                        @keyframes fadeInUp {
+                            from { opacity: 0; transform: translate(-50%, 20px); }
+                            to { opacity: 1; transform: translate(-50%, 0); }
+                        }
+                        @keyframes fadeOutDown {
+                            from { opacity: 1; transform: translate(-50%, 0); }
+                            to { opacity: 0; transform: translate(-50%, 20px); }
+                        }
+                    `;
+                    document.head.appendChild(styles);
+                }
+                
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 3000);
+            }
+
+            getRandomContact() {
+                const randomIndex = Math.floor(Math.random() * this.samsungContacts.length);
+                return this.samsungContacts[randomIndex];
+            }
+
+            hideAllScreens() {
+                this.incomingCall.classList.remove('show');
+                this.activeCall.classList.remove('show');
+                this.keypadModal.classList.remove('show');
+                this.controlPanel.style.display = 'block';
+            }
+
+            resetCallControls() {
+                this.isMuted = false;
+                this.isSpeakerOn = false;
+                this.muteBtn.textContent = '🎤';
+                this.muteBtn.classList.remove('muted');
+                this.speakerBtn.classList.remove('speaker-on');
+                this.keypadValue = '';
+            }
+
+            // Utility method to add more realistic call behaviors
+            simulateNetworkDelay() {
+                return new Promise(resolve => {
+                    setTimeout(resolve, Math.random() * 1000 + 500);
+                });
+            }
+
+            // Method to handle device vibration (if supported)
+            vibrate(pattern = [200, 100, 200]) {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            }
+        }
+
+        // Initialize the Samsung Fake Call App when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.samsungFakeCallApp = new SamsungFakeCallApp();
+        });
+
+        // Handle page visibility changes to pause/resume calls
+        document.addEventListener('visibilitychange', () => {
+            const app = window.samsungFakeCallApp;
+            if (app) {
+                if (document.hidden) {
+                    // Pause ringtone when tab is not visible
+                    if (app.ringtone && !app.ringtone.paused) {
+                        app.ringtone.pause();
+                    }
+                }
+            }
+        });
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log("Service Worker Registered"));
+        }
+    </script>
+</body>
+</html>
